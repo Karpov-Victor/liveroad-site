@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Галерея LiveRoad — фотографии из поездок по 27 странам: города, горы, море и люди. Без фильтров и постановки.">
+<title>Галерея — LiveRoad</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    color: #1f2937;
+    background: #f9fafb;
+    line-height: 1.6;
+  }
+  a { text-decoration: none; color: inherit; }
+  img { display: block; width: 100%; object-fit: cover; }
+  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+  /* ===== Шапка ===== */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 40px;
+    background: rgba(17, 24, 39, .92);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    box-shadow: 0 2px 16px rgba(0,0,0,.2);
+  }
+  .logo {
+    color: #fff; font-size: 22px; font-weight: 800;
+    letter-spacing: 1px;
+    white-space: nowrap;
+  }
+  .logo span { color: #ffb703; }
+  nav ul { display: flex; gap: 26px; list-style: none; }
+  nav a {
+    color: #fff; font-size: 15px;
+    transition: color .2s;
+  }
+  nav a:hover, nav a[aria-current="page"] { color: #ffb703; }
+
+  /* Бургер */
+  .burger {
+    display: none;
+    width: 40px; height: 40px;
+    background: none; border: none; cursor: pointer;
+    flex-direction: column; justify-content: center; gap: 5px;
+    padding: 8px;
+  }
+  .burger span {
+    display: block; height: 2px; background: #fff;
+    border-radius: 2px; transition: transform .3s, opacity .3s;
+  }
+  .burger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .burger.open span:nth-child(2) { opacity: 0; }
+  .burger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ===== Заголовок страницы ===== */
+  .page-hero {
+    padding: 72px 0 20px;
+    background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+    color: #fff;
+    text-align: center;
+  }
+  .page-hero h1 {
+    font-size: clamp(28px, 3.5vw, 44px);
+    font-weight: 800;
+    letter-spacing: -1px;
+    margin-bottom: 12px;
+  }
+  .page-hero p {
+    font-size: clamp(16px, 1.6vw, 20px);
+    color: #d1d5db;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  /* ===== Табы регионов ===== */
+  .region-tabs {
+    display: flex; flex-wrap: wrap; gap: 10px;
+    justify-content: center;
+    margin: 40px 0 32px;
+  }
+  .region-tab {
+    padding: 10px 22px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 30px;
+    background: transparent;
+    color: #4b5563;
+    font-family: inherit;
+    font-size: .95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .region-tab:hover {
+    border-color: #e76f51;
+    color: #e76f51;
+  }
+  .region-tab.active {
+    background: #e76f51;
+    border-color: #e76f51;
+    color: #fff;
+  }
+
+  /* ===== Панели регионов ===== */
+  .region-panel { display: none; }
+  .region-panel.active { display: block; animation: fadeIn .3s ease; }
+  .region-panel[hidden] { display: none !important; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ===== Сетка фото ===== */
+  .photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+    margin-bottom: 40px;
+  }
+  .photo {
+    position: relative;
+    display: block;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background: #e5e7eb;
+    cursor: zoom-in;
+  }
+  .photo img {
+    height: 100%;
+    transition: transform .4s, opacity .3s;
+  }
+  .photo:hover img { transform: scale(1.06); opacity: .9; }
+  .photo-info {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 24px 12px 10px;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,.75));
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .photo-country {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ffb703;
+  }
+  .photo-place {
+    font-size: .95rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  /* ===== Подвал ===== */
+  footer { background: #111827; color: #9ca3af; padding: 48px 0 32px; font-size: .9rem; }
+  .footer-inner { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 24px; margin-bottom: 32px; }
+  .footer-col h4 { color: #f3f4f6; margin-bottom: 12px; font-size: .95rem; }
+  .footer-col a { display: block; margin-bottom: 8px; transition: color .2s; }
+  .footer-col a:hover { color: #f3f4f6; }
+  .footer-bottom { border-top: 1px solid #1f2937; padding-top: 24px; text-align: center; font-size: .85rem; }
+
+  /* ===== Лайтбокс (нативный dialog) ===== */
+  .lightbox {
+    border: none;
+    padding: 0;
+    background: transparent;
+    max-width: 100vw;
+    max-height: 100vh;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  .lightbox::backdrop {
+    background: rgba(0, 0, 0, .92);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+  .lightbox[open] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .lb-stage {
+    position: relative;
+    max-width: 92vw;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .lb-img {
+    max-width: 92vw;
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+  }
+  .lb-caption {
+    margin-top: 16px;
+    text-align: center;
+    color: #fff;
+    max-width: 720px;
+    padding: 0 16px;
+  }
+  .lb-country {
+    font-size: .75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #ffb703;
+  }
+  .lb-place {
+    display: block;
+    font-size: clamp(18px, 2vw, 24px);
+    font-weight: 700;
+    margin: 4px 0 8px;
+  }
+  .lb-desc {
+    font-size: .95rem;
+    color: #d1d5db;
+    line-height: 1.5;
+  }
+
+  /* Кнопки лайтбокса */
+  .lb-close, .lb-prev, .lb-next {
+    position: fixed;
+    z-index: 10;
+    width: 48px; height: 48px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,.15);
+    color: #fff;
+    font-size: 24px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .2s, color .2s;
+  }
+  .lb-close:hover, .lb-prev:hover, .lb-next:hover {
+    background: rgba(255,183,3,.85);
+    color: #1a1a2e;
+  }
+  .lb-close { top: 20px; right: 20px; font-size: 28px; }
+  .lb-prev { left: 20px; top: 50%; transform: translateY(-50%); }
+  .lb-next { right: 20px; top: 50%; transform: translateY(-50%); }
+
+  /* ===== Адаптив ===== */
+  @media (max-width: 820px) {
+    header { padding: 14px 20px; }
+    .burger { display: flex; }
+    nav {
+      position: fixed; top: 0; right: 0; bottom: 0;
+      width: min(280px, 80vw);
+      background: rgba(17, 24, 39, .98);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      padding: 90px 32px 32px;
+      transform: translateX(100%);
+      transition: transform .3s ease;
+      z-index: 90;
+    }
+    nav.open { transform: translateX(0); }
+    nav ul { flex-direction: column; gap: 4px; }
+    nav a {
+      display: block; font-size: 18px; padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+    }
+    .page-hero { padding: 90px 0 24px; }
+    .lb-prev { left: 8px; }
+    .lb-next { right: 8px; }
+    .lb-close { top: 8px; right: 8px; }
+  }
+
+  @media (max-width: 600px) {
+    .photo-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .photo-place { font-size: .85rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ===== ШАПКА ===== -->
+<header id="siteHeader"></header>
+
+<!-- ===== ЗАГОЛОВОК ===== -->
+<section class="page-hero">
+  <div class="container">
+    <h1>Галерея</h1>
+    <p>На этой страничке вы можете увидеть фотографии, которые я сделал во время моих поездок.  Приятного просмотра.</p>
+  </div>
+</section>
+
+<!-- ===== ТАБЫ + ПАНЕЛИ ===== -->
+<main>
+  <div class="container">
+
+    <div class="region-tabs" role="tablist" aria-label="Регионы мира">
+      <button class="region-tab active" id="tab-cis" data-region="cis" role="tab" aria-selected="true" aria-controls="panel-cis" tabindex="0">СНГ</button>
+      <button class="region-tab" id="tab-caucasus" data-region="caucasus" role="tab" aria-selected="false" aria-controls="panel-caucasus" tabindex="-1">Кавказ</button>
+      <button class="region-tab" id="tab-central-asia" data-region="central-asia" role="tab" aria-selected="false" aria-controls="panel-central-asia" tabindex="-1">Средняя Азия</button>
+      <button class="region-tab" id="tab-europe" data-region="europe" role="tab" aria-selected="false" aria-controls="panel-europe" tabindex="-1">Европа</button>
+      <button class="region-tab" id="tab-asia" data-region="asia" role="tab" aria-selected="false" aria-controls="panel-asia" tabindex="-1">Азия</button>
+      <button class="region-tab" id="tab-other" data-region="other" role="tab" aria-selected="false" aria-controls="panel-other" tabindex="-1">Другие</button>
+    </div>
+
+    <div class="region-panels">
+
+      <!-- ===== СНГ ===== -->
+      <div class="region-panel active" id="panel-cis" data-region="cis" role="tabpanel" aria-labelledby="tab-cis">
+        <div class="photo-grid">
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Беларусь" data-place="Минск"
+             data-desc="Прогулка по центру Минска: проспект Независимости, площадь Ленина и тихие дворы, где время будто остановилось.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Минск, Беларусь">
+            <div class="photo-info"><span class="photo-country">Беларусь</span><span class="photo-place">Минск</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Беларусь" data-place="Мирский замок"
+             data-desc="Мирский замок XVI века — один из немногих, который устоял в войнах. Утром здесь почти нет туристов.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Мирский замок, Беларусь">
+            <div class="photo-info"><span class="photo-country">Беларусь</span><span class="photo-place">Мирский замок</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Россия" data-place="Москва"
+             data-desc="Москва с высоты: деловой центр, Садовое кольцо и река — город, который не спит и не останавливается.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Москва, Россия">
+            <div class="photo-info"><span class="photo-country">Россия</span><span class="photo-place">Москва</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Россия" data-place="Байкал"
+             data-desc="Лёд Байкала в феврале — прозрачный, как стекло. По нему можно идти пешком и видеть дно на метры вниз.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Байкал, Россия">
+            <div class="photo-info"><span class="photo-country">Россия</span><span class="photo-place">Байкал</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Украина" data-place="Львов"
+             data-desc="Львов — город кофе и брусчатки. Здесь пьют кофе на ходу, слушают джаз во дворах и не спешат.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Львов, Украина">
+            <div class="photo-info"><span class="photo-country">Украина</span><span class="photo-place">Львов</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Дагестан" data-place="Сулакский каньон"
+             data-desc="Сулакский каньон — глубже, чем кажется. Бирюзовая вода и отвесные стены, к которым ведёт серпантин.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Сулакский каньон, Дагестан">
+            <div class="photo-info"><span class="photo-country">Дагестан</span><span class="photo-place">Сулакский каньон</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Дагестан" data-place="Дербент"
+             data-desc="Дербент — один из древнейших городов России. Крепость Нарын-Кала стоит здесь больше 1500 лет.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Дербент, Дагестан">
+            <div class="photo-info"><span class="photo-country">Дагестан</span><span class="photo-place">Дербент</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Карелия" data-place="Ладожские шхеры"
+             data-desc="Ладожские шхеры — скалы, вода и сосны. Летом здесь тихо, а зимой — снег по пояс и ни одного человека.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Ладожские шхеры, Карелия">
+            <div class="photo-info"><span class="photo-country">Карелия</span><span class="photo-place">Ладожские шхеры</span></div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ===== КАВКАЗ ===== -->
+      <div class="region-panel" id="panel-caucasus" data-region="caucasus" role="tabpanel" aria-labelledby="tab-caucasus" hidden>
+        <div class="photo-grid">
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Армения" data-place="Ереван"
+             data-desc="Ереван — розовый город из туфа. Кажется, что солнце здесь не заходит: оно просто становится мягче.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Ереван, Армения">
+            <div class="photo-info"><span class="photo-country">Армения</span><span class="photo-place">Ереван</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Армения" data-place="Озеро Севан"
+             data-desc="Севан — высокогорное озеро, которое местные называют морем. Вода холодная, небо огромное, ветер сильный.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Озеро Севан, Армения">
+            <div class="photo-info"><span class="photo-country">Армения</span><span class="photo-place">Озеро Севан</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Азербайджан" data-place="Баку"
+             data-desc="Баку — город, где старые крепостные стены соседствуют со стеклянными небоскрёбами. Ветер с Каспия не прекращается.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Баку, Азербайджан">
+            <div class="photo-info"><span class="photo-country">Азербайджан</span><span class="photo-place">Баку</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Азербайджан" data-place="Шеки"
+             data-desc="Шеки — город ремесленников. Здесь делают шёлк, пекут пахлаву и разговаривают на языке, которого больше нигде нет.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Шеки, Азербайджан">
+            <div class="photo-info"><span class="photo-country">Азербайджан</span><span class="photo-place">Шеки</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Грузия" data-place="Тбилиси"
+             data-desc="Тбилиси — город балконов и серных бань. Утром здесь пахнет кофе, вечером — вином и музыкой из открытых окон.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Тбилиси, Грузия">
+            <div class="photo-info"><span class="photo-country">Грузия</span><span class="photo-place">Тбилиси</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Грузия" data-place="Казбеги"
+             data-desc="Казбеги — край, где Кавказские горы кажутся ближе, чем есть. Церковь Гергети стоит на фоне Казбека, как на открытке.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Казбеги, Грузия">
+            <div class="photo-info"><span class="photo-country">Грузия</span><span class="photo-place">Казбеги</span></div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ===== СРЕДНЯЯ АЗИЯ ===== -->
+      <div class="region-panel" id="panel-central-asia" data-region="central-asia" role="tabpanel" aria-labelledby="tab-central-asia" hidden>
+        <div class="photo-grid">
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Таджикистан" data-place="Памирский тракт"
+             data-desc="Памирский тракт — одна из самых высокогорных дорог мира. Справа — обрыв, слева — скала, впереди — облака.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Памирский тракт, Таджикистан">
+            <div class="photo-info"><span class="photo-country">Таджикистан</span><span class="photo-place">Памирский тракт</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Таджикистан" data-place="Искандеркуль"
+             data-desc="Искандеркуль — озеро в горах Фан. Вода бирюзовая, воздух разрежённый, и с непривычки кружится голова.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Искандеркуль, Таджикистан">
+            <div class="photo-info"><span class="photo-country">Таджикистан</span><span class="photo-place">Искандеркуль</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Узбекистан" data-place="Самарканд"
+             data-desc="Самарканд — город Шёлкового пути. Регистан, мавзолеи и мозаика, которой больше 600 лет, а цвет всё ещё яркий.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Самарканд, Узбекистан">
+            <div class="photo-info"><span class="photo-country">Узбекистан</span><span class="photo-place">Самарканд</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Узбекистан" data-place="Бухара"
+             data-desc="Бухара — город, где время идёт медленно. Глиняные стены, купола базаров и чай на каждом углу.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Бухара, Узбекистан">
+            <div class="photo-info"><span class="photo-country">Узбекистан</span><span class="photo-place">Бухара</span></div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ===== ЕВРОПА ===== -->
+      <div class="region-panel" id="panel-europe" data-region="europe" role="tabpanel" aria-labelledby="tab-europe" hidden>
+        <div class="photo-grid">
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Черногория" data-place="Котор"
+             data-desc="Котор — город у подножия гор, у которого стены поднимаются прямо в небо. Сверху видно весь залив.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Котор, Черногория">
+            <div class="photo-info"><span class="photo-country">Черногория</span><span class="photo-place">Котор</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Германия" data-place="Берлин"
+             data-desc="Берлин — город, где история на каждом шагу. Стена, музеи, уличное искусство и лучший дёнер в Европе.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Берлин, Германия">
+            <div class="photo-info"><span class="photo-country">Германия</span><span class="photo-place">Берлин</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Польша" data-place="Краков"
+             data-desc="Краков — город, который почти не пострадал в войну. Старый город, Вавель и уютные дворы с кофейнями.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Краков, Польша">
+            <div class="photo-info"><span class="photo-country">Польша</span><span class="photo-place">Краков</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Италия" data-place="Рим"
+             data-desc="Рим — город, где античные руины стоят прямо посреди улицы. Кофе здесь пьют стоя, а обед длится два часа.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Рим, Италия">
+            <div class="photo-info"><span class="photo-country">Италия</span><span class="photo-place">Рим</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Чехия" data-place="Прага"
+             data-desc="Прага — город, который не нужно искать: он сам тебя находит. Карлов мост, Староместская площадь и пиво.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Прага, Чехия">
+            <div class="photo-info"><span class="photo-country">Чехия</span><span class="photo-place">Прага</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Мальта" data-place="Валлетта"
+             data-desc="Валлетта — столица размером с район. Всё в шаговой доступности, а море видно почти из любой точки.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Валлетта, Мальта">
+            <div class="photo-info"><span class="photo-country">Мальта</span><span class="photo-place">Валлетта</span></div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ===== АЗИЯ ===== -->
+      <div class="region-panel" id="panel-asia" data-region="asia" role="tabpanel" aria-labelledby="tab-asia" hidden>
+        <div class="photo-grid">
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Индия" data-place="Тадж-Махал"
+             data-desc="Тадж-Махал — место, куда приезжают все. И всё равно он оказывается больше и красивее, чем ожидаешь.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Тадж-Махал, Индия">
+            <div class="photo-info"><span class="photo-country">Индия</span><span class="photo-place">Тадж-Махал</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Вьетнам" data-place="Халонг"
+             data-desc="Бухта Халонг — тысячи известняковых скал в воде. Лучше всего смотреть с лодки на рассвете, когда туман.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Бухта Халонг, Вьетнам">
+            <div class="photo-info"><span class="photo-country">Вьетнам</span><span class="photo-place">Халонг</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Таиланд" data-place="Бангкок"
+             data-desc="Бангкок — город контрастов: храмы, небоскрёбы, уличная еда и вечное движение. Никогда не спит.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Бангкок, Таиланд">
+            <div class="photo-info"><span class="photo-country">Таиланд</span><span class="photo-place">Бангкок</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Южная Корея" data-place="Сеул"
+             data-desc="Сеул — город, где древние дворцы стоят рядом с неоновыми вывесками. Всё быстро, ярко и очень вкусно.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Сеул, Южная Корея">
+            <div class="photo-info"><span class="photo-country">Южная Корея</span><span class="photo-place">Сеул</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Малайзия" data-place="Куала-Лумпур"
+             data-desc="Куала-Лумпур — город башен-близнецов и джунглей. Петронас-Тауэрс утром выглядят как из фильма.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Куала-Лумпур, Малайзия">
+            <div class="photo-info"><span class="photo-country">Малайзия</span><span class="photo-place">Куала-Лумпур</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Кипр" data-place="Пафос"
+             data-desc="Пафос — место, где античные мозаики лежат прямо под ногами. И море — тёплое почти круглый год.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Пафос, Кипр">
+            <div class="photo-info"><span class="photo-country">Кипр</span><span class="photo-place">Пафос</span></div>
+          </a>
+
+        </div>
+      </div>
+
+      <!-- ===== ДРУГИЕ ===== -->
+      <div class="region-panel" id="panel-other" data-region="other" role="tabpanel" aria-labelledby="tab-other" hidden>
+        <div class="photo-grid">
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Египет" data-place="Пирамиды Гизы"
+             data-desc="Пирамиды Гизы — единственное из семи чудес древнего мира, которое сохранилось. И всё ещё впечатляет.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Пирамиды Гизы, Египет">
+            <div class="photo-info"><span class="photo-country">Египет</span><span class="photo-place">Пирамиды Гизы</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Египет" data-place="Красное море"
+             data-desc="Красное море — одно из лучших мест для дайвинга. Кораллы, рыбы и видимость до 30 метров.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Красное море, Египет">
+            <div class="photo-info"><span class="photo-country">Египет</span><span class="photo-place">Красное море</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Куба" data-place="Гавана"
+             data-desc="Гавана — город, где время остановилось. Ретро-автомобили, колониальные фасады и музыка на каждом углу.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Гавана, Куба">
+            <div class="photo-info"><span class="photo-country">Куба</span><span class="photo-place">Гавана</span></div>
+          </a>
+
+          <a class="photo" href="images/gallery/placeholder.jpg"
+             data-country="Куба" data-place="Варадеро"
+             data-desc="Варадеро — белый песок и бирюзовая вода. Курорт, но если отойти от отелей — тихие пляжи и рыбацкие лодки.">
+            <img loading="lazy" src="images/gallery/placeholder.jpg" alt="Варадеро, Куба">
+            <div class="photo-info"><span class="photo-country">Куба</span><span class="photo-place">Варадеро</span></div>
+          </a>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<!-- ===== ПОДВАЛ ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>LiveRoad</h4>
+        <p style="font-size:.85rem; max-width:260px;">Личный блог о странах, маршрутах и честных отчётах.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Разделы</h4>
+        <a href="../index.html#countries">Страны</a>
+        <a href="../index.html#fresh">Свежее</a>
+        <a href="../index.html#tours">Туры</a>
+        <a href="index.html">Галерея</a>
+        <a href="../index.html#about">Обо мне</a>
+      </div>
+      <div class="footer-col">
+        <h4>Контакты</h4>
+        <a href="#">Telegram</a>
+        <a href="#">Instagram</a>
+        <a href="#">Email</a>
+      </div>
+    </div>
+    <div class="footer-bottom">© 2026 LiveRoad. Все фото — авторские.</div>
+  </div>
+</footer>
+
+<!-- ===== ЛАЙТБОКС ===== -->
+<dialog class="lightbox" id="lightbox" aria-label="Просмотр фото">
+  <button class="lb-close" aria-label="Закрыть">×</button>
+  <button class="lb-prev" aria-label="Предыдущее фото">‹</button>
+  <button class="lb-next" aria-label="Следующее фото">›</button>
+  <div class="lb-stage">
+    <img class="lb-img" src="" alt="">
+    <div class="lb-caption">
+      <span class="lb-country"></span>
+      <span class="lb-place"></span>
+      <p class="lb-desc"></p>
+    </div>
+  </div>
+</dialog>
+
+<script>
+(function () {
+  /* ===== Табы регионов (ARIA tabs pattern) ===== */
+  const regionTabs = Array.from(document.querySelectorAll('.region-tab'));
+  const regionPanels = Array.from(document.querySelectorAll('.region-panel'));
+
+  function activateTab(tab, setFocus) {
+    const region = tab.dataset.region;
+    regionTabs.forEach(t => {
+      const isActive = t === tab;
+      t.classList.toggle('active', isActive);
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.tabIndex = isActive ? 0 : -1;
+    });
+    regionPanels.forEach(p => {
+      const isActive = p.dataset.region === region;
+      p.classList.toggle('active', isActive);
+      p.hidden = !isActive;
+    });
+    if (setFocus) tab.focus();
+  }
+
+  regionTabs.forEach((tab, i) => {
+    tab.addEventListener('click', () => activateTab(tab, false));
+    tab.addEventListener('keydown', e => {
+      let nextIndex = null;
+      if (e.key === 'ArrowRight') nextIndex = (i + 1) % regionTabs.length;
+      else if (e.key === 'ArrowLeft') nextIndex = (i - 1 + regionTabs.length) % regionTabs.length;
+      else if (e.key === 'Home') nextIndex = 0;
+      else if (e.key === 'End') nextIndex = regionTabs.length - 1;
+      if (nextIndex !== null) {
+        e.preventDefault();
+        activateTab(regionTabs[nextIndex], true);
+      }
+    });
+  });
+
+  /* ===== Лайтбокс ===== */
+  const lightbox = document.getElementById('lightbox');
+  const lbImg = lightbox.querySelector('.lb-img');
+  const lbCountry = lightbox.querySelector('.lb-country');
+  const lbPlace = lightbox.querySelector('.lb-place');
+  const lbDesc = lightbox.querySelector('.lb-desc');
+  const btnClose = lightbox.querySelector('.lb-close');
+  const btnPrev = lightbox.querySelector('.lb-prev');
+  const btnNext = lightbox.querySelector('.lb-next');
+
+  let currentPhotos = [];
+  let currentIndex = 0;
+
+  function openLightbox(photo) {
+    const panel = photo.closest('.region-panel');
+    currentPhotos = Array.from(panel.querySelectorAll('.photo'));
+    currentIndex = currentPhotos.indexOf(photo);
+    renderLightbox();
+    lightbox.showModal();
+    document.body.style.overflow = 'hidden';
+  }
+
+  function renderLightbox() {
+    const photo = currentPhotos[currentIndex];
+    const img = photo.querySelector('img');
+    lbImg.src = img.src;
+    lbImg.alt = img.alt;
+    lbCountry.textContent = photo.dataset.country || '';
+    lbPlace.textContent = photo.dataset.place || '';
+    lbDesc.textContent = photo.dataset.desc || '';
+    const multiple = currentPhotos.length > 1;
+    btnPrev.style.display = multiple ? '' : 'none';
+    btnNext.style.display = multiple ? '' : 'none';
+  }
+
+  function closeLightbox() {
+    lightbox.close();
+    document.body.style.overflow = '';
+  }
+
+  // Клик по фото — открыть
+  document.querySelectorAll('.photo').forEach(photo => {
+    photo.addEventListener('click', e => {
+      e.preventDefault();
+      openLightbox(photo);
+    });
+  });
+
+  // Закрытие
+  btnClose.addEventListener('click', closeLightbox);
+  lightbox.addEventListener('click', e => {
+    // клик по затемнённому фону (не по .lb-stage и не по кнопкам)
+    if (e.target === lightbox) closeLightbox();
+  });
+  lightbox.addEventListener('cancel', () => {
+    // Esc — нативный, но вернём overflow
+    document.body.style.overflow = '';
+  });
+
+  // Стрелки
+  btnPrev.addEventListener('click', () => {
+    currentIndex = (currentIndex - 1 + currentPhotos.length) % currentPhotos.length;
+    renderLightbox();
+  });
+  btnNext.addEventListener('click', () => {
+    currentIndex = (currentIndex + 1) % currentPhotos.length;
+    renderLightbox();
+  });
+  lightbox.addEventListener('keydown', e => {
+    if (e.key === 'ArrowLeft') { e.preventDefault(); btnPrev.click(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); btnNext.click(); }
+  });
+})();
+</script>
+
+/* ===== Подключение меню ===== */
+<script src="../menu.js" defer></script>
+
+</body>
+</html>
