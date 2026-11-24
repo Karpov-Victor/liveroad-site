@@ -1,16 +1,18 @@
-// menu.js — общая шапка для всех страниц LiveRoad
 (function () {
+  const base = document.querySelector('meta[name="base"]')?.content || '';
+
   const headerHTML = `
-    <a class="logo" href="../index.html">LiveRoad<span> авторские путешествия по миру</span></a>
+    <a class="logo" href="${base}index.html">LiveRoad<span> авторские путешествия по миру</span></a>
     <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="mainNav">
       <span></span><span></span><span></span>
     </button>
     <nav id="mainNav">
       <ul>
-        <li><a href="/index.html#countries">Страны</a></li>
-        <li><a href="/index.html#fresh">Свежее</a></li>
-        <li><a href="/index.html#tours">Туры</a></li>
-        <li><a href="/gallery/index.html">Галерея</a></li>
+        <li><a href="${base}index.html#countries">Страны</a></li>
+        <li><a href="${base}index.html#fresh">Свежее</a></li>
+        <li><a href="${base}index.html#tours">Туры</a></li>
+        <li><a href="${base}gallery/index.html">Галерея</a></li>
+       <li><a href="${base}about/index.html">Обо мне</a></li>
       </ul>
     </nav>
   `;
@@ -20,7 +22,6 @@
 
   header.innerHTML = headerHTML;
 
-  // Бургер-меню
   const burger = header.querySelector('#burger');
   const nav = header.querySelector('#mainNav');
 
@@ -41,9 +42,20 @@
   // Авто-подсветка активного пункта по URL
   const currentPath = window.location.pathname;
   nav.querySelectorAll('a').forEach(a => {
-    const href = a.getAttribute('href');
-    if (href && currentPath.endsWith(href.replace(/^\//, ''))) {
+    let href = a.getAttribute('href');
+    if (!href) return;
+
+    // Убираем ведущие ./ ../ и /, чтобы остался чистый путь
+    const cleanHref = href
+      .replace(/^\.\//, '')     // убираем "./"
+      .replace(/^\.\.\//, '')   // убираем "../"
+      .replace(/^\//, '');      // убираем "/"
+
+    // Сравниваем: заканчивается ли текущий URL на этот чистый путь
+    if (cleanHref && currentPath.endsWith(cleanHref)) {
       a.setAttribute('aria-current', 'page');
     }
   });
+
+
 })();
