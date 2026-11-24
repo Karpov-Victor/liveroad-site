@@ -533,55 +533,9 @@
     <h2 class="section-title">Отзывы</h2>
     <p class="section-subtitle">Что говорят те, кто уже ездил</p>
 
-    <div class="reviews-grid">
+    <div class="reviews-grid"  id="reviewsGrid">
 
-      <div class="review-card">
-        <p class="review-quote">«Впервые ехала в горы и боялась, что не справлюсь. Виктор всё продумал: от темпа до ночёвок. Ни одного срыва, ни одной паники — только впечатления.»</p>
-        <div class="review-author">
-          <div class="review-name">Анна</div>
-          <div class="review-meta">Москва · Грузия, 2024</div>
-        </div>
-      </div>
 
-      <div class="review-card">
-        <p class="review-quote">«Больше всего ценю, что не было „свободного времени, гуляйте сами“. Каждый день был наполнен, но без спешки. Такой баланс — редкость.»</p>
-        <div class="review-author">
-          <div class="review-name">Дмитрий</div>
-          <div class="review-meta">Санкт-Петербург · Армения, 2023</div>
-        </div>
-      </div>
-
-      <div class="review-card">
-        <p class="review-quote">«Ездила с Виктором в Марокко. Понравилось, что он не прятал минусы: сразу сказал, где будет тяжело, где дорого, где жарко. Честность подкупает.»</p>
-        <div class="review-author">
-          <div class="review-name">Елена</div>
-          <div class="review-meta">Казань · Марокко, 2025</div>
-        </div>
-      </div>
-
-      <div class="review-card">
-        <p class="review-quote">«Я тот ещё скептик, но после тура в Японию понял: маршрут действительно собран человеком, а не скопирован из путеводителя. Много мест, куда сам бы не попал.»</p>
-        <div class="review-author">
-          <div class="review-name">Алексей</div>
-          <div class="review-meta">Новосибирск · Япония, 2026</div>
-        </div>
-      </div>
-
-      <div class="review-card">
-        <p class="review-quote">«Группа была небольшая, атмосфера — как у друзей. Виктор не просто водил, а рассказывал, отвечал на вопросы, помогал. Чувствовалась забота.»</p>
-        <div class="review-author">
-          <div class="review-name">Мария</div>
-          <div class="review-meta">Екатеринбург · Черногория, 2024</div>
-        </div>
-      </div>
-
-      <div class="review-card">
-        <p class="review-quote">«После тура в Узбекистан осталось ощущение, что я увидел страну, а не открытку. Самарканд в 6 утра, бухарские дворы, чай у местных — такое не забудешь.»</p>
-        <div class="review-author">
-          <div class="review-name">Сергей</div>
-          <div class="review-meta">Нижний Новгород · Узбекистан, 2025</div>
-        </div>
-      </div>
 
     </div>
   </div>
@@ -643,6 +597,32 @@
       burger.setAttribute('aria-expanded', 'false');
     });
   });
+
+/* ===== Отзывы из JSON ===== */
+  const reviewsGrid = document.getElementById('reviewsGrid');
+  if (reviewsGrid) {
+    fetch('../data/reviews.json')
+      .then(response => {
+        if (!response.ok) throw new Error('Не удалось загрузить отзывы');
+        return response.json();
+      })
+      .then(reviews => {
+        reviewsGrid.innerHTML = reviews.map(review => `
+          <div class="review-card">
+            <p class="review-quote">«${review.quote}»</p>
+            <div class="review-author">
+              <div class="review-name">${review.name}</div>
+              <div class="review-meta">${review.meta}</div>
+            </div>
+          </div>
+        `).join('');
+      })
+      .catch(error => {
+        console.error('Ошибка загрузки отзывов:', error);
+        reviewsGrid.innerHTML = '<p style="color:#9ca3af;">Не удалось загрузить отзывы.</p>';
+      });
+  }
+
 })();
 </script>
 
