@@ -413,7 +413,21 @@
 <body>
 
 <!-- ===== ШАПКА ===== -->
-<header id="siteHeader"></header>
+<header id="siteHeader">
+  <a class="logo" href="../index.html">LiveRoad<span> авторские путешествия по миру</span></a>
+  <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="mainNav">
+    <span></span><span></span><span></span>
+  </button>
+  <nav id="mainNav">
+    <ul>
+      <li><a href="../index.html#countries">Страны</a></li>
+      <li><a href="../index.html#fresh">Свежее</a></li>
+      <li><a href="../index.html#tours">Туры</a></li>
+      <li><a href="../gallery/index.html">Галерея</a></li>
+      <li><a href="index.html" aria-current="page">Обо мне</a></li>
+    </ul>
+  </nav>
+</header>
 
 <!-- ===== HERO ===== -->
 <section class="hero">
@@ -532,11 +546,7 @@
   <div class="container">
     <h2 class="section-title">Отзывы</h2>
     <p class="section-subtitle">Что говорят те, кто уже ездил</p>
-
     <div class="reviews-grid"  id="reviewsGrid">
-
-
-
     </div>
   </div>
 </section>
