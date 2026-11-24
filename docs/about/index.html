@@ -413,21 +413,7 @@
 <body>
 
 <!-- ===== ШАПКА ===== -->
-<header id="siteHeader">
-  <a class="logo" href="../index.html">LiveRoad<span> авторские путешествия по миру</span></a>
-  <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="mainNav">
-    <span></span><span></span><span></span>
-  </button>
-  <nav id="mainNav">
-    <ul>
-      <li><a href="../index.html#countries">Страны</a></li>
-      <li><a href="../index.html#fresh">Свежее</a></li>
-      <li><a href="../index.html#tours">Туры</a></li>
-      <li><a href="../gallery/index.html">Галерея</a></li>
-      <li><a href="index.html" aria-current="page">Обо мне</a></li>
-    </ul>
-  </nav>
-</header>
+<header id="siteHeader"></header>
 
 <!-- ===== HERO ===== -->
 <section class="hero">
@@ -593,22 +579,7 @@
 
 <script>
 (function () {
-  const burger = document.getElementById('burger');
-  const nav = document.getElementById('mainNav');
-  burger.addEventListener('click', () => {
-    const isOpen = nav.classList.toggle('open');
-    burger.classList.toggle('open', isOpen);
-    burger.setAttribute('aria-expanded', isOpen);
-  });
-  nav.querySelectorAll('a').forEach(a => {
-    a.addEventListener('click', () => {
-      nav.classList.remove('open');
-      burger.classList.remove('open');
-      burger.setAttribute('aria-expanded', 'false');
-    });
-  });
-
-/* ===== Отзывы из JSON ===== */
+  /* ===== Отзывы из JSON ===== */
   const reviewsGrid = document.getElementById('reviewsGrid');
   if (reviewsGrid) {
     fetch('../data/reviews.json')
@@ -632,11 +603,9 @@
         reviewsGrid.innerHTML = '<p style="color:#9ca3af;">Не удалось загрузить отзывы.</p>';
       });
   }
-
 })();
 </script>
 
-/* ===== Подключение меню ===== */
 <script src="../menu.js" defer></script>
 
 </body>
